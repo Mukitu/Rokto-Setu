@@ -39,9 +39,12 @@ function SearchContent() {
   const [loading, setLoading] = useState(false)
   const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null)
   const [selectedDonor, setSelectedDonor] = useState<User | null>(null)
+  const [currentPage, setCurrentPage] = useState(1)
+  const ITEMS_PER_PAGE = 5
 
   const handleSearch = async (useLocation = false) => {
     setLoading(true)
+    setCurrentPage(1)
     try {
       let query = supabase.from('users').select('*').eq('is_active', true)
 
@@ -97,6 +100,9 @@ function SearchContent() {
     router.replace(`/search?${params.toString()}`, { scroll: false })
   }, [activeTab, bloodGroup, district, speciality])
 
+  const totalPages = Math.ceil(results.length / ITEMS_PER_PAGE)
+  const paginatedResults = results.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE)
+
   const handleNearbySearch = () => {
     if (navigator.geolocation) {
       setLoading(true)
@@ -117,9 +123,9 @@ function SearchContent() {
   }
 
   return (
-    <div className="flex flex-col md:flex-row h-[calc(100vh-64px)]">
+    <div className="flex flex-col md:flex-row md:h-[calc(100vh-64px)] overflow-y-auto md:overflow-hidden">
       {/* Sidebar */}
-      <div className="w-full md:w-96 bg-white shadow-lg z-10 flex flex-col h-full overflow-hidden">
+      <div className="w-full md:w-96 bg-white shadow-lg z-10 flex flex-col md:h-full overflow-visible md:overflow-hidden">
         {/* Tabs */}
         <div className="flex border-b border-gray-200">
           <button
@@ -194,7 +200,7 @@ function SearchContent() {
         </div>
 
         {/* Results List */}
-        <div className="flex-1 overflow-y-auto p-4 bg-gray-50">
+        <div className="flex-1 overflow-y-visible md:overflow-y-auto p-4 bg-gray-50">
           {loading ? (
             <div className="flex justify-center items-center h-32">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
@@ -206,7 +212,7 @@ function SearchContent() {
             </div>
           ) : (
             <div className="space-y-3">
-              {results.map((user) => (
+              {paginatedResults.map((user) => (
                 <div key={user.id} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
                   <div className="flex justify-between items-start mb-2">
                     <div className="flex flex-col">
@@ -274,13 +280,55 @@ function SearchContent() {
                   </div>
                 </div>
               ))}
+
+              {/* Pagination Controls */}
+              {totalPages > 1 && (
+                <div className="flex justify-center items-center gap-2 mt-6 py-4 border-t border-gray-200">
+                  <button
+                    onClick={() => {
+                      setCurrentPage(prev => Math.max(prev - 1, 1))
+                      window.scrollTo({ top: 0, behavior: 'smooth' })
+                    }}
+                    disabled={currentPage === 1}
+                    className="flex items-center gap-1 px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium disabled:opacity-50 hover:bg-gray-50 transition-colors text-gray-700"
+                  >
+                    &larr; আগেরটি
+                  </button>
+                  
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                      <button
+                        key={page}
+                        onClick={() => {
+                          setCurrentPage(page)
+                          window.scrollTo({ top: 0, behavior: 'smooth' })
+                        }}
+                        className={`w-8 h-8 flex items-center justify-center rounded-lg text-sm font-medium transition-colors ${currentPage === page ? 'bg-red-600 text-white' : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'}`}
+                      >
+                        {page}
+                      </button>
+                    )).slice(Math.max(0, currentPage - 2), Math.min(totalPages, currentPage + 1))}
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      setCurrentPage(prev => Math.min(prev + 1, totalPages))
+                      window.scrollTo({ top: 0, behavior: 'smooth' })
+                    }}
+                    disabled={currentPage === totalPages}
+                    className="flex items-center gap-1 px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium disabled:opacity-50 hover:bg-gray-50 transition-colors text-gray-700"
+                  >
+                    পরবর্তী &rarr;
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>
       </div>
 
       {/* Map Area */}
-      <div className="flex-1 h-[50vh] md:h-full relative bg-gray-200 z-0">
+      <div className="w-full h-[400px] md:flex-1 md:h-full relative bg-gray-200 z-0">
         <MapComponent users={results} centerLoc={userLocation} />
       </div>
 
