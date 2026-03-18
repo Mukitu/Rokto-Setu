@@ -208,20 +208,36 @@ function SearchContent() {
               {results.map((user) => (
                 <div key={user.id} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
                   <div className="flex justify-between items-start mb-2">
-                    <h3 className="font-bold text-gray-900 text-lg">{user.name}</h3>
+                    <div className="flex flex-col">
+                      <button 
+                        onClick={() => window.location.href = `/profile/${user.id}`}
+                        className="text-left hover:text-red-600 transition-colors"
+                      >
+                        <h3 className="font-bold text-gray-900 text-lg flex items-center gap-2">
+                          {user.name}
+                          {user.total_ratings > 0 && (
+                            <span className="flex items-center gap-0.5 text-yellow-600 text-sm font-bold bg-yellow-50 px-2 py-0.5 rounded-lg">
+                              <Star size={14} className="fill-yellow-600" />
+                              {user.avg_rating.toFixed(1)}
+                            </span>
+                          )}
+                        </h3>
+                      </button>
+                      {user.total_ratings > 0 && (
+                        <button 
+                          onClick={() => window.location.href = `/profile/${user.id}`}
+                          className="text-[10px] text-gray-500 hover:text-red-500 text-left mt-0.5"
+                        >
+                          {user.total_ratings}টি রিভিউ - বিস্তারিত দেখুন
+                        </button>
+                      )}
+                    </div>
                     {user.blood_group && activeTab === 'blood' && (
                       <span className="bg-red-100 text-red-700 px-2.5 py-1 rounded-full text-xs font-bold">
                         {user.blood_group}
                       </span>
                     )}
                   </div>
-
-                  {user.total_ratings > 0 && (
-                    <div className="flex items-center gap-1 text-yellow-600 font-bold text-xs mb-2">
-                      <Star size={12} className="fill-yellow-600" />
-                      {user.avg_rating.toFixed(1)} ({user.total_ratings})
-                    </div>
-                  )}
                   
                   {user.doctor_speciality && activeTab === 'doctor' && (
                     <p className="text-sm text-green-600 font-medium mb-2">{user.doctor_speciality}</p>
