@@ -9,6 +9,7 @@ import { User } from '@/types'
 import { useToast } from '@/hooks/useToast'
 import { calculateDistance } from '@/lib/utils'
 import dynamic from 'next/dynamic'
+import RequestModal from '@/components/RequestModal'
 
 const MapComponent = dynamic(() => import('@/components/MapComponent'), {
   ssr: false,
@@ -36,6 +37,7 @@ function SearchContent() {
   const [results, setResults] = useState<User[]>([])
   const [loading, setLoading] = useState(false)
   const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null)
+  const [selectedDonor, setSelectedDonor] = useState<User | null>(null)
 
   const handleSearch = async (useLocation = false) => {
     setLoading(true)
@@ -239,7 +241,10 @@ function SearchContent() {
                       কল করুন
                     </a>
                     {activeTab === 'blood' && (
-                      <button className="flex-1 bg-red-50 text-red-600 hover:bg-red-100 text-center py-2 rounded-lg text-sm font-medium transition-colors border border-red-200">
+                      <button 
+                        onClick={() => setSelectedDonor(user)}
+                        className="flex-1 bg-red-50 text-red-600 hover:bg-red-100 text-center py-2 rounded-lg text-sm font-medium transition-colors border border-red-200"
+                      >
                         অনুরোধ করুন
                       </button>
                     )}
@@ -255,6 +260,13 @@ function SearchContent() {
       <div className="flex-1 h-[50vh] md:h-full relative bg-gray-200 z-0">
         <MapComponent users={results} centerLoc={userLocation} />
       </div>
+
+      {selectedDonor && (
+        <RequestModal 
+          donor={selectedDonor} 
+          onClose={() => setSelectedDonor(null)} 
+        />
+      )}
     </div>
   )
 }
