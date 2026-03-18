@@ -1,5 +1,7 @@
 {
-  "name": "রক্তসেতু (Roktosetu)",
+  "name": "Blood",
   "description": "Blood Donation and Healthcare Service web application",
-  "requestFramePermissions": ["geolocation"]
+  "requestFramePermissions": [
+    "geolocation"
+  ]
 }

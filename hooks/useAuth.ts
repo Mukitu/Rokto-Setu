@@ -47,15 +47,18 @@ export function useAuth() {
       if (session) {
         loadProfile(session)
       } else {
+        console.log('useAuth: No session found, setting loading to false')
         if (mounted) setLoading(false)
       }
     })
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('useAuth: Auth state changed:', event, session)
         if (session) {
           await loadProfile(session)
         } else {
+          console.log('useAuth: No session in auth state change, setting user null and loading false')
           if (mounted) {
             setUser(null)
             setLoading(false)
