@@ -27,6 +27,7 @@ export function useAuth() {
           throw error
         }
 
+        console.log('useAuth: loadProfile - Data received:', data)
         if (data) {
           console.log('useAuth: loadProfile - Profile found:', data)
           if (mounted) setUser(data)
