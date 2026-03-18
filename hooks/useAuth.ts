@@ -77,6 +77,7 @@ export function useAuth() {
     const email = phoneToEmail(userData.phone)
     console.log('useAuth: signUp - Attempting auth for:', email)
     
+    // Auth ইউজার তৈরি
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password: userData.password,
@@ -90,9 +91,31 @@ export function useAuth() {
     if (!authData.user) throw new Error('Auth user creation failed')
  
     console.log('useAuth: signUp - Auth success, user ID:', authData.user.id)
-    console.log('useAuth: signUp - Attempting to insert profile for:', authData.user.id)
 
-    const profileData = {
+    // প্রোফাইল ইনসার্ট
+    const { error: profileError } = await supabase
+      .from('users')
+      .insert({
+        auth_id: authData.user.id,
+        name: userData.name,
+        email: email,
+        phone: userData.phone,
+        blood_group: userData.blood_group,
+        district: userData.district,
+        upazila: userData.upazila,
+        is_donor: true,
+      })
+ 
+    if (profileError) {
+      console.error('useAuth: signUp - Profile creation error:', profileError)
+      await supabase.auth.signOut()
+      throw profileError
+    }
+
+    console.log('useAuth: signUp - Profile creation success')
+    
+    // প্রোফাইল ইনসার্ট হওয়ার পর ম্যানুয়ালি ইউজার সেট করুন
+    setUser({
       auth_id: authData.user.id,
       name: userData.name,
       email: email,
@@ -100,33 +123,9 @@ export function useAuth() {
       blood_group: userData.blood_group,
       district: userData.district,
       upazila: userData.upazila,
-      bio: userData.bio || null,
       is_donor: true,
-      is_doctor: userData.is_doctor || false,
-      doctor_speciality: userData.doctor_speciality || null,
-      chamber_address: userData.chamber_address || null,
-      visit_fee: userData.visit_fee || null,
-      is_ambulance: userData.is_ambulance || false,
-      vehicle_type: userData.vehicle_type || null,
-      vehicle_number: userData.vehicle_number || null,
-      lat: userData.lat || null,
-      lng: userData.lng || null,
-    }
+    } as any)
 
-    console.log('useAuth: signUp - Profile data to insert:', profileData)
-
-    const { error: profileError } = await supabase
-      .from('users')
-      .insert(profileData)
- 
-    if (profileError) {
-      console.error('useAuth: signUp - Profile creation error:', profileError)
-      // Cleanup auth user if profile creation fails
-      await supabase.auth.signOut()
-      throw profileError
-    }
-
-    console.log('useAuth: signUp - Profile creation success')
     return authData
   }
   
