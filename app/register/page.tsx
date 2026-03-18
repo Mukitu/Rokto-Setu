@@ -54,6 +54,12 @@ export default function Register() {
     e.preventDefault()
     setLoading(true)
 
+    if (!email || !email.includes('@')) {
+      toast.error('সঠিক ইমেইল দিন')
+      setLoading(false)
+      return
+    }
+
     if (phone.length !== 11 || !phone.startsWith('01')) {
       toast.error('সঠিক মোবাইল নম্বর দিন (১১ ডিজিট)')
       setLoading(false)

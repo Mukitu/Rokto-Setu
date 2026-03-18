@@ -9,28 +9,69 @@ export function useAuth() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) loadProfile(data.session.user.id)
-      else setLoading(false)
-    })
+    let mounted = true;
+
+    async function initAuth() {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession()
+        if (error) throw error;
+        
+        if (session && mounted) {
+          await loadProfile(session.user.id)
+        } else if (mounted) {
+          setLoading(false)
+        }
+      } catch (error) {
+        console.error('Auth initialization error:', error)
+        if (mounted) setLoading(false)
+      }
+    }
+
+    initAuth()
 
     const { data: listener } = supabase.auth.onAuthStateChange(
-      (_, session) => {
-        if (session) loadProfile(session.user.id)
-        else { setUser(null); setLoading(false) }
+      async (event, session) => {
+        console.log('Auth state changed:', event, session?.user?.id)
+        if (session && mounted) {
+          await loadProfile(session.user.id)
+        } else if (mounted) {
+          setUser(null)
+          setLoading(false)
+        }
       }
     )
-    return () => listener.subscription.unsubscribe()
+
+    return () => {
+      mounted = false;
+      listener.subscription.unsubscribe()
+    }
   }, [])
 
   async function loadProfile(authId: string) {
-    const { data } = await supabase
-      .from('users')
-      .select('*')
-      .eq('auth_id', authId)
-      .single()
-    setUser(data)
-    setLoading(false)
+    console.log('Loading profile for:', authId)
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('auth_id', authId)
+        .maybeSingle()
+      
+      if (error) {
+        console.error('Error loading profile:', error)
+        setUser(null)
+      } else if (!data) {
+        console.warn('No profile found for authId:', authId)
+        setUser(null)
+      } else {
+        console.log('Profile loaded:', data.name)
+        setUser(data)
+      }
+    } catch (error) {
+      console.error('Unexpected error loading profile:', error)
+      setUser(null)
+    } finally {
+      setLoading(false)
+    }
   }
 
   async function signUp(userData: {

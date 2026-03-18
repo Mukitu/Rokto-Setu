@@ -63,7 +63,7 @@ export default function Login() {
                 value={identifier}
                 onChange={(e) => setIdentifier(e.target.value)}
                 className="mt-1 appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm"
-                placeholder="ইমেইল অথবা মোবাইল নম্বর দিন"
+                placeholder="Gmail/Number"
               />
             </div>
             <div>

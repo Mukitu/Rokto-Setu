@@ -49,6 +49,7 @@ export interface BloodRequest {
   patient_name?: string
   patient_phone?: string
   hospital_name?: string
+  disease_name?: string
   message?: string
   status: RequestStatus
   created_at: string

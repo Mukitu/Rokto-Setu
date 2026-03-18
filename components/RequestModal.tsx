@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { X, Droplet, Send, User, Hospital, MapPin } from 'lucide-react'
+import { X, Droplet, Send, User, Hospital, Phone, Activity } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/hooks/useToast'
@@ -23,6 +23,7 @@ export default function RequestModal({ donor, onClose }: RequestModalProps) {
     patient_name: '',
     patient_phone: '',
     hospital_name: '',
+    disease_name: '',
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -42,6 +43,7 @@ export default function RequestModal({ donor, onClose }: RequestModalProps) {
           patient_name: formData.patient_name,
           patient_phone: formData.patient_phone,
           hospital_name: formData.hospital_name,
+          disease_name: formData.disease_name,
           blood_group: donor.blood_group,
           status: 'pending'
         })
@@ -59,7 +61,7 @@ export default function RequestModal({ donor, onClose }: RequestModalProps) {
 
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[100] p-4 animate-in fade-in duration-300">
-      <div className="bg-white rounded-2xl p-8 w-full max-w-md shadow-2xl relative">
+      <div className="bg-white rounded-2xl p-8 w-full max-w-md shadow-2xl relative max-h-[90vh] overflow-y-auto">
         <button 
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
@@ -120,6 +122,20 @@ export default function RequestModal({ donor, onClose }: RequestModalProps) {
               placeholder="হাসপাতালের নাম ও ঠিকানা লিখুন"
               value={formData.hospital_name}
               onChange={(e) => setFormData({ ...formData, hospital_name: e.target.value })}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1 flex items-center gap-2">
+              <Activity size={14} className="text-gray-400" /> রোগের নাম
+            </label>
+            <input
+              required
+              type="text"
+              className="w-full border border-gray-200 rounded-xl p-3 focus:outline-none focus:border-[#C0001A] text-sm"
+              placeholder="রোগের নাম লিখুন"
+              value={formData.disease_name}
+              onChange={(e) => setFormData({ ...formData, disease_name: e.target.value })}
             />
           </div>
 
