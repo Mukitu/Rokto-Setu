@@ -1,0 +1,27 @@
+@import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --red: #C0001A;
+  --red-dark: #8B0000;
+  --red-light: #FF3355;
+  --bg: #FFF8F0;
+  --white: #FFFFFF;
+  --text: #1A0A0A;
+  --grey: #6B7280;
+  --green: #0A7A40;
+  --orange: #D97706;
+}
+
+body {
+  font-family: 'Hind Siliguri', sans-serif;
+  background-color: var(--bg);
+  color: var(--text);
+}
+
+.hero-gradient {
+  background: linear-gradient(135deg, var(--red-dark) 0%, var(--red) 100%);
+}
