@@ -12,6 +12,7 @@ export function useAuth() {
     let mounted = true
 
     async function loadProfile(session: any) {
+      console.log('useAuth: loadProfile called for session:', session.user.id)
       if (!session?.user || !mounted) return
 
       try {
@@ -22,20 +23,19 @@ export function useAuth() {
           .maybeSingle()
         
         if (error) {
-          console.error('Error loading profile:', error)
+          console.error('useAuth: loadProfile - Supabase error:', error)
           throw error
         }
 
         if (data) {
+          console.log('useAuth: loadProfile - Profile found:', data)
           if (mounted) setUser(data)
         } else {
-          console.warn('No profile found for authenticated user:', session.user.id)
-          // If no profile found, we might want to sign out or redirect to a setup page
-          // For now, we'll just let the user be null which will trigger a redirect to login
+          console.warn('useAuth: loadProfile - No profile found for user:', session.user.id)
           if (mounted) setUser(null)
         }
       } catch (error) {
-        console.error('Error in loadProfile:', error)
+        console.error('useAuth: loadProfile - Catch block error:', error)
       } finally {
         if (mounted) setLoading(false)
       }
