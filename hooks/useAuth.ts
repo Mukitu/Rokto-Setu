@@ -75,48 +75,58 @@ export function useAuth() {
 
   async function signUp(userData: any) {
     const email = phoneToEmail(userData.phone)
-    console.log('Signing up with email:', email)
-    const { data: authData, error } = await supabase.auth.signUp({
+    console.log('useAuth: signUp - Attempting auth for:', email)
+    
+    const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password: userData.password,
     })
     
-    if (error) {
-      console.error('Signup error:', error)
-      throw error
+    if (authError) {
+      console.error('useAuth: signUp - Auth error:', authError)
+      throw authError
     }
+    
     if (!authData.user) throw new Error('Auth user creation failed')
  
+    console.log('useAuth: signUp - Auth success, user ID:', authData.user.id)
+    console.log('useAuth: signUp - Attempting to insert profile for:', authData.user.id)
+
+    const profileData = {
+      auth_id: authData.user.id,
+      name: userData.name,
+      email: email,
+      phone: userData.phone,
+      blood_group: userData.blood_group,
+      district: userData.district,
+      upazila: userData.upazila,
+      bio: userData.bio || null,
+      is_donor: true,
+      is_doctor: userData.is_doctor || false,
+      doctor_speciality: userData.doctor_speciality || null,
+      chamber_address: userData.chamber_address || null,
+      visit_fee: userData.visit_fee || null,
+      is_ambulance: userData.is_ambulance || false,
+      vehicle_type: userData.vehicle_type || null,
+      vehicle_number: userData.vehicle_number || null,
+      lat: userData.lat || null,
+      lng: userData.lng || null,
+    }
+
+    console.log('useAuth: signUp - Profile data to insert:', profileData)
+
     const { error: profileError } = await supabase
       .from('users')
-      .insert({
-        auth_id: authData.user.id,
-        name: userData.name,
-        email,
-        phone: userData.phone,
-        blood_group: userData.blood_group,
-        district: userData.district,
-        upazila: userData.upazila,
-        bio: userData.bio || null,
-        is_donor: true,
-        is_doctor: userData.is_doctor,
-        doctor_speciality: userData.doctor_speciality || null,
-        chamber_address: userData.chamber_address || null,
-        visit_fee: userData.visit_fee || null,
-        is_ambulance: userData.is_ambulance,
-        vehicle_type: userData.vehicle_type || null,
-        vehicle_number: userData.vehicle_number || null,
-        lat: userData.lat || null,
-        lng: userData.lng || null,
-      })
+      .insert(profileData)
  
     if (profileError) {
-      console.error('Profile creation error:', profileError)
+      console.error('useAuth: signUp - Profile creation error:', profileError)
       // Cleanup auth user if profile creation fails
       await supabase.auth.signOut()
       throw profileError
     }
 
+    console.log('useAuth: signUp - Profile creation success')
     return authData
   }
   
